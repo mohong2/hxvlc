@@ -13,23 +13,6 @@ import hxvlc.util.macros.DefineMacro;
 import sys.FileSystem;
 import sys.thread.Mutex;
 
-/**
- * hxcpp <= 4.2 / Haxe <= 4.2 cannot render the template argument of
- * `@:native('std::vector')` generic externs, so this engine ships a concrete
- * non-generic binding instead (see SeiunEngine fork notes).
- */
-@:include('vector')
-@:native('std::vector<const char*>')
-@:unreflective
-@:structAccess
-private extern class VlcArgVector
-{
-	function new():Void;
-	function push_back(value:cpp.ConstCharStar):Void;
-	function data():cpp.RawPointer<cpp.ConstCharStar>;
-	function size():Int;
-}
-
 #if HXVLC_LOGGING
 import cpp.RawConstPointer;
 import cpp.VarList;
@@ -47,6 +30,23 @@ import lime.utils.Assets;
 
 import sys.io.File;
 #end
+
+/**
+ * hxcpp <= 4.2 / Haxe <= 4.2 cannot render the template argument of
+ * `@:native('std::vector')` generic externs, so this engine ships a concrete
+ * non-generic binding instead (see SeiunEngine fork notes).
+ */
+@:include('vector')
+@:native('std::vector<const char*>')
+@:unreflective
+@:structAccess
+private extern class VlcArgVector
+{
+	function new():Void;
+	function push_back(value:cpp.ConstCharStar):Void;
+	function data():cpp.RawPointer<cpp.ConstCharStar>;
+	function size():Int;
+}
 
 /** This class manages the global instance of LibVLC, providing methods for initialization, disposal, and retrieving version information. */
 #if HXVLC_LOGGING
