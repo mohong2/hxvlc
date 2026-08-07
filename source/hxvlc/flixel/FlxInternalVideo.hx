@@ -26,6 +26,53 @@ class FlxInternalVideo extends Video
 	/** The volume adjustment. */
 	public var volumeAdjust(default, set):Float = 1.0;
 
+	// ------------------------------------------------------------------
+	// SeiunEngine: global instance tracking + cleanup safety net.
+	//
+	// Mods frequently create video objects through Lua/HScript and never
+	// dispose them (e.g. `new MP4Handler()` + `playVideo()` with no
+	// onDestroy hook). Every such instance keeps a libVLC media player
+	// decoding frames (forceRendering), so one leaked video per level
+	// entry quickly tanks the framerate.
+	//
+	// We register every FlxInternalVideo on construction and remove it on
+	// dispose. `disposeAll()` is called by PlayState.destroy() as a safety
+	// net so no video survives a level switch.
+	// ------------------------------------------------------------------
+
+	static var _instances:Array<FlxInternalVideo> = [];
+
+	@:noCompletion private var _disposed:Bool = false;
+
+	/** Dispose every still-alive video instance (idempotent). */
+	public static function disposeAll():Void
+	{
+		if (_instances.length == 0)
+			return;
+
+		var copy:Array<FlxInternalVideo> = _instances.copy();
+		for (video in copy)
+		{
+			if (video != null)
+			{
+				try
+				{
+					video.dispose();
+				}
+				catch (e:Dynamic)
+				{
+					// Never let a leaked video take down the level switch.
+				}
+			}
+		}
+	}
+
+	/** Number of live (not yet disposed) video instances - for diagnostics. */
+	public static function getLiveCount():Int
+	{
+		return _instances.length;
+	}
+
 	@:noCompletion
 	private var resumeOnFocus:Bool = false;
 
@@ -33,6 +80,9 @@ class FlxInternalVideo extends Video
 	public function new(smoothing:Bool = true):Void
 	{
 		super(smoothing);
+
+		_disposed = false;
+		_instances.push(this);
 
 		onOpening.add(function():Void
 		{
@@ -126,6 +176,12 @@ class FlxInternalVideo extends Video
 	@:inheritDoc(hxvlc.openfl.Video.dispose)
 	public override function dispose():Void
 	{
+		if (_disposed)
+			return;
+		_disposed = true;
+
+		_instances.remove(this);
+
 		if (FlxG.signals.focusGained.has(onFocusGained))
 			FlxG.signals.focusGained.remove(onFocusGained);
 
