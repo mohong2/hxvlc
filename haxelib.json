@@ -17,9 +17,5 @@
 		"MAJigsaw77"
 	],
 	"classPath": "source",
-	"dependencies": {
-		"hxcpp": "",
-		"lime": "",
-		"openfl": ""
-	}
+	"dependencies": {}
 }
