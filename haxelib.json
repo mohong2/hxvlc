@@ -11,11 +11,13 @@
 		"haxeflixel"
 	],
 	"description": "A Haxe/OpenFL library for @:native video playback using libVLC.",
-	"version": "2.2.5",
-	"releasenote": "Optimized Videos Rendering, Fixed subtitles from not showing on Apple targets and some other stuff.",
+	"version": "2.3.1",
+	"releasenote": "SeiunEngine stable fork of upstream 2.3.1 (libVLC 3.0.23): restored CPU BitmapData rendering (useTexture/forceRendering), deduplicated Handle.initAsync, FlxInternalVideo leak guard, zero file caching.",
 	"contributors": [
-		"MAJigsaw77"
+		"MAJigsaw77",
+		"mo_hong"
 	],
 	"classPath": "source",
-	"dependencies": {}
+	"dependencies": {},
+	"dependencies_note": "Deliberately empty: this project pins hxcpp/lime/openfl itself (Project.xml + hmm.json), so empty version strings must not exist here or haxelib pulls the latest releases."
 }

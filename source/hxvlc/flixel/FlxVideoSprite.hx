@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxColor;
 
-import hxvlc.util.Location;
+import openfl.display.BitmapData;
 
 /**
  * This class extends `FlxSprite` to display video files in HaxeFlixel.
@@ -32,7 +32,6 @@ import hxvlc.util.Location;
  * 	FlxTimer.wait(0.001, () -> video.play());
  * ```
  */
-@:nullSafety
 class FlxVideoSprite extends FlxSprite
 {
 	/** The video bitmap object. */
@@ -41,30 +40,38 @@ class FlxVideoSprite extends FlxSprite
 	/**
 	 * Creates a `FlxVideoSprite` at a specified position.
 	 * 
+	 * @param instance (Optional) The instance of LibVLC to be used for this Video object.
 	 * @param x The initial X position of the sprite.
 	 * @param y The initial Y position of the sprite.
 	 */
-	public function new(?x:Float = 0, ?y:Float = 0):Void
+	public function new(?instance:hxvlc.impl.Instance, ?x:Float = 0, ?y:Float = 0):Void
 	{
 		super(x, y);
 
 		makeGraphic(1, 1, FlxColor.TRANSPARENT);
 
-		bitmap = new FlxInternalVideo(antialiasing);
-		bitmap.forceRendering = true;
+		bitmap = new FlxInternalVideo(instance, antialiasing);
 		bitmap.onFormatSetup.add(function():Void
 		{
-			if (bitmap != null && bitmap.bitmapData != null)
-				loadGraphic(FlxGraphic.fromBitmapData(bitmap.bitmapData, false, null, false));
+			final videoBitmapData:Null<BitmapData> = bitmap?.bitmapData;
+
+			if (videoBitmapData != null)
+				loadGraphic(FlxGraphic.fromBitmapData(videoBitmapData, false, null, false));
 		});
 		bitmap.visible = false;
 		FlxG.game.addChild(bitmap);
 	}
 
 	@:inheritDoc(hxvlc.openfl.Video.load)
-	public function load(location:Location, ?options:Array<String>):Bool
+	public function load(location:hxvlc.openfl.Location, ?options:Array<String>):Bool
 	{
 		return bitmap != null ? bitmap.load(location, options) : false;
+	}
+
+	@:inheritDoc(hxvlc.openfl.Video.precache)
+	public function precache(location:hxvlc.openfl.Location, ?options:Array<String>):Bool
+	{
+		return bitmap != null ? bitmap.precache(location, options) : false;
 	}
 
 	@:inheritDoc(hxvlc.openfl.Video.loadFromSubItem)
